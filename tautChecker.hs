@@ -1,3 +1,11 @@
+{-
+ - Author: Cameron Miskell, cmiskell2020@my.fit.edu
+ - Author: Luke Bucher, lbucher2017@my.fit.edu
+ - Course: CSE 4250, Fall 2021
+ - Project: Proj4, Tautology Checker
+ - Language implementation: Glorious Glasgow Haskell Compilation System, version 8.4.3
+ -}
+ 
 -- Style Tips:
 -- Don't leave trailing white space in your code
 -- Don't use tabs
@@ -12,12 +20,10 @@ data PropFormula = Term Char Bool | Operator PropFormula PropFormula Char |
 -- Step two: recursive function to convert the formula to negation normal form
 -- Cases needing conversion: negation on formulas, implies, nand, xor, equals
 toNNF (Term x y) = Term x y
-toNNF (Negation (Term x y)) = Term x (not y)
-toNNF (Negation (Negation formOne)) = toNNF formOne
-toNNF (Negation (Operator formOne formTwo 'A')) =
-   Operator (toNNF (Negation formOne)) (toNNF (Negation formTwo)) 'K'
-toNNF (Negation (Operator formOne formTwo 'K')) =
-   Operator (toNNF (Negation formOne)) (toNNF (Negation formTwo)) 'A'
+toNNF (Operator formOne formTwo 'A') =
+   Operator (toNNF formOne) (toNNF formTwo) 'A'
+toNNF (Operator formOne formTwo 'K') =
+   Operator (toNNF formOne) (toNNF formTwo) 'K'
 toNNF (Operator formOne formTwo 'C') =
    Operator (toNNF (Negation formOne)) (toNNF formTwo) 'A'
 toNNF (Operator formOne formTwo 'D') =
@@ -26,7 +32,21 @@ toNNF (Operator formOne formTwo 'J') =
    Operator (Operator (toNNF formOne) (toNNF (Negation formTwo)) 'K')
       (Operator (toNNF (Negation formOne)) (toNNF formTwo) 'K') 'A'
 toNNF (Operator formOne formTwo 'E') =
-
+   Operator (toNNF formOne) (toNNF formTwo) 'K'
+toNNF (Negation (Term x y)) = Term x (not y)
+toNNF (Negation (Negation formOne)) = toNNF formOne
+toNNF (Negation (Operator formOne formTwo 'A')) =
+   Operator (toNNF (Negation formOne)) (toNNF (Negation formTwo)) 'K'
+toNNF (Negation (Operator formOne formTwo 'K')) =
+   Operator (toNNF (Negation formOne)) (toNNF (Negation formTwo)) 'A'
+toNNF (Negation (Operator formOne formTwo 'C')) =
+   toNNF (Operator formOne (Negation formTwo) 'K')
+toNNF (Negation (Operator formOne formTwo 'D')) =
+   toNNF (Operator formOne formTwo 'K')
+toNNF (Negation (Operator formOne formTwo 'J')) =
+   toNNF (Negation (toNNF (Operator formOne formTwo 'J')))
+toNNF (Negation (Operator formOne formTwo 'E')) =
+   toNNF (Negation (toNNF (Operator formOne formTwo 'E')))
 
 -- Step three: recursive function to convert negation to conjunctive norm form
 
