@@ -6,13 +6,27 @@
 -- Don't use explicit braces and semicolons
 
 -- Step one: make a data type for propositional logic formulas
-data propFormula = Term Char Bool | Operator Char propFormula |
-   Operator Char propFormula propFormula
+data PropFormula = Term Char Bool | Operator PropFormula PropFormula Char |
+   Negation PropFormula deriving (Eq, Show)
 
 -- Step two: recursive function to convert the formula to negation normal form
 -- Cases needing conversion: negation on formulas, implies, nand, xor, equals
-toNNF (Term _ _) = (Term _ _)
-toNNF (Operator 'N' (Term _ x)) = (Term _ not x)
+toNNF (Term x y) = Term x y
+toNNF (Negation (Term x y)) = Term x (not y)
+toNNF (Negation (Negation formOne)) = toNNF formOne
+toNNF (Negation (Operator formOne formTwo 'A')) =
+   Operator (toNNF (Negation formOne)) (toNNF (Negation formTwo)) 'K'
+toNNF (Negation (Operator formOne formTwo 'K')) =
+   Operator (toNNF (Negation formOne)) (toNNF (Negation formTwo)) 'A'
+toNNF (Operator formOne formTwo 'C') =
+   Operator (toNNF (Negation formOne)) (toNNF formTwo) 'A'
+toNNF (Operator formOne formTwo 'D') =
+   toNNF (Negation (Operator formOne formTwo 'K'))
+toNNF (Operator formOne formTwo 'J') =
+   Operator (Operator (toNNF formOne) (toNNF (Negation formTwo)) 'K')
+      (Operator (toNNF (Negation formOne)) (toNNF formTwo) 'K') 'A'
+toNNF (Operator formOne formTwo 'E') =
+
 
 -- Step three: recursive function to convert negation to conjunctive norm form
 
