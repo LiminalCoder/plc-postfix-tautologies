@@ -1,9 +1,9 @@
 {-
  - Author: Cameron Miskell, cmiskell2020@my.fit.edu
  - Author: Luke Bucher, lbucher2017@my.fit.edu
- - Course: CSE 4250, Fall 2021
+ - Course: CSE 4250, Fall 2022
  - Project: Proj4, Tautology Checker
- - Language implementation: Glorious Glasgow Haskell Compilation System, version 8.4.3
+ - Language implementation: GHC version 9.4.2
  -}
 
 -- Style Tips:
@@ -59,14 +59,22 @@ toNNF (Negation (Operator formOne formTwo 'E')) =
 -- Step three: recursive function to convert negation to conjunctive norm form
 toCNF (Term x y) = Term x y
 toCNF (Operator (Term x y) (Term p q) 'A') =
-   (Operator (Term x y) (Term p q) 'A')
+   Operator (Term x y) (Term p q) 'A'
 toCNF (Operator (Operator formOne formTwo 'K') formThree 'A') =
    Operator (toCNF (Operator formOne formThree 'A'))
-      (toCNF (Operator formTwo formThree 'A') 'K')
+      (toCNF (Operator formTwo formThree 'A')) 'K'
 toCNF (Operator formThree (Operator formOne formTwo 'K') 'A') =
    Operator (toCNF (Operator formOne formThree 'A'))
-      (toCNF (Operator formTwo formThree 'A') 'K')
+      (toCNF (Operator formTwo formThree 'A')) 'K'
 
 -- Step four: recursive function to check if a formula is a tautology
 -- Base case: a single clause has "P" and "not P" for proposition P
 -- Recursive case: the formula consists of multiple clauses
+isTautology (Term x y) = "false" ++ x
+
+-- Step five: apply the above functions to string input and return output
+toPropForm [x] = Term x True
+toPropForm [x:'N'] = Term x False
+toPropForm [x:y:]
+tautChecker = \ x -> unlines (map isTautology (map toCNF
+   (map toNNF (map toPropForm (lines x)))))
