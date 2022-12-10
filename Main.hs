@@ -36,9 +36,10 @@ toNNF (Operator formOne formTwo 'D') =
 toNNF (Operator formOne formTwo 'J') =
    Operator (Operator (toNNF formOne) (toNNF (Negation formTwo)) 'K')
       (Operator (toNNF (Negation formOne)) (toNNF formTwo) 'K') 'A'
--- Equivalence NEEDS CHECKED
+-- Equivalence
 toNNF (Operator formOne formTwo 'E') =
-   Operator (toNNF formOne) (toNNF formTwo) 'K'
+   toNNF (Operator (Operator formOne formTwo 'C')
+      (Operator formTwo formOne 'C') 'K')
 
 -- Negations of cases
 toNNF (Negation (Term x y)) = Term x (not y)
@@ -73,8 +74,12 @@ toCNF (Operator formThree (Operator formOne formTwo 'K') 'A') =
 isTautology (Term x y) = "false" ++ x
 
 -- Step five: apply the above functions to string input and return output
-toPropForm [x] = Term x True
-toPropForm [x:'N'] = Term x False
-toPropForm [x:y:]
+isOperator x = (any x ['A', 'C', 'D', 'E', 'J', 'K'])
+
+toPropForm xs = 
+   front = reverse (takeWhile isOperator xs)
+   foldl 
+   
+
 tautChecker = \ x -> unlines (map isTautology (map toCNF
-   (map toNNF (map toPropForm (lines x)))))
+   (map toNNF (map toPropForm (map reverse (lines x))))))
