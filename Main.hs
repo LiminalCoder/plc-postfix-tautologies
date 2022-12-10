@@ -71,14 +71,23 @@ toCNF (Operator formThree (Operator formOne formTwo 'K') 'A') =
 -- Step four: recursive function to check if a formula is a tautology
 -- Base case: a single clause has "P" and "not P" for proposition P
 -- Recursive case: the formula consists of multiple clauses
-isTautology (Term x y) = "false" ++ x
+isTautology (Term x y) = "false" ++ x:[]
 
 -- Step five: apply the above functions to string input and return output
-isOperator x = (any x ['A', 'C', 'D', 'E', 'J', 'K'])
+isOperator x = (any (==x) ['A', 'C', 'D', 'E', 'J', 'K'])
 
-toPropForm xs = 
-   front = reverse (takeWhile isOperator xs)
-   foldl 
+toPropForm (x:[]) = Term x True
+toPropForm (x:y:[]) = Term y False
+toPropForm (x:y:z:[]) = Operator (Term z True) (Term y True) x
+-- I don't think this is the right way to do the recursive case
+toPropForm (x:y:z:l:[]) = if z == 'N'
+   then Operator (Term l False) (Term y True) x
+   else if y == 'N'
+      then Operator (Term l True) (Term z False) x
+      else Negation (Operator (Term l True) (Term z True) y)
+-- This feels more correct for the recursive case, but I'm struggling with it
+toPropForm (x:y:z:zs) = if x == 'N' then Negation (toPropForm y:z:zs)
+   else if y == 'N' then if (or ((isOperator z):(z == 'N'):[]))
    
 
 tautChecker = \ x -> unlines (map isTautology (map toCNF
